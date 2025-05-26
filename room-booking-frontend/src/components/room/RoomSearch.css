@@ -1,0 +1,66 @@
+/* RoomSearch.css */
+
+.room-search-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.room-search-title {
+  margin-bottom: 16px;
+}
+
+.room-search-bar {
+  padding: 16px;
+  margin-bottom: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.room-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.room-grid-item {
+  flex: 1 1 calc(50% - 24px);
+  max-width: calc(50% - 24px);
+  display: flex;
+}
+
+.room-card {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  padding: 16px;
+}
+
+.room-card-content {
+  flex-grow: 1;
+}
+
+.room-card-actions {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.room-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 900px) {
+  .room-grid-item {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+} 

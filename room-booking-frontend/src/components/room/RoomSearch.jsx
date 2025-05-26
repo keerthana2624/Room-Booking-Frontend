@@ -1,24 +1,30 @@
 import React, { useState } from 'react';
+import './RoomSearch.css';
 import {
-  Box,
-  Grid,
-  Paper,
   TextField,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Card,
   CardContent,
   CardActions,
   Button,
   Chip,
-  Stack,
+  Snackbar,
+  Alert,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import BookingForm from '../booking/BookingForm';
 
 // Mock data for rooms
 const mockRooms = [
@@ -29,6 +35,7 @@ const mockRooms = [
     amenities: ['Projector', 'Whiteboard', 'Video Conferencing'],
     location: 'Floor 1',
     status: 'available',
+    description: 'Modern conference room with high-end video conferencing equipment',
   },
   {
     id: 2,
@@ -37,6 +44,7 @@ const mockRooms = [
     amenities: ['Whiteboard', 'TV Screen'],
     location: 'Floor 2',
     status: 'available',
+    description: 'Cozy meeting room perfect for small team discussions',
   },
   {
     id: 3,
@@ -45,18 +53,85 @@ const mockRooms = [
     amenities: ['Projector', 'Whiteboard', 'Video Conferencing', 'Sound System'],
     location: 'Floor 3',
     status: 'available',
+    description: 'Large training room with advanced audio-visual equipment',
   },
+  {
+    id: 4,
+    name: 'Executive Suite',
+    capacity: 8,
+    amenities: ['Smart TV', 'Coffee Machine', 'Video Conferencing', 'Sound System'],
+    location: 'Floor 4',
+    status: 'available',
+    description: 'Premium executive meeting room with luxury amenities',
+  },
+  {
+    id: 5,
+    name: 'Innovation Lab',
+    capacity: 15,
+    amenities: ['Interactive Whiteboard', '3D Printer', 'VR Equipment', 'Smart Board'],
+    location: 'Floor 2',
+    status: 'available',
+    description: 'Creative space for innovation and brainstorming sessions',
+  },
+  {
+    id: 6,
+    name: 'Board Room',
+    capacity: 12,
+    amenities: ['Projector', 'Video Conferencing', 'Smart Board', 'Executive Chairs'],
+    location: 'Floor 1',
+    status: 'available',
+    description: 'Elegant board room for executive meetings and presentations',
+  },
+  {
+    id: 7,
+    name: 'Collaboration Hub',
+    capacity: 25,
+    amenities: ['Multiple Screens', 'Wireless Presentation', 'Whiteboard Walls', 'Coffee Station'],
+    location: 'Floor 3',
+    status: 'available',
+    description: 'Dynamic space designed for team collaboration and workshops',
+  },
+  {
+    id: 8,
+    name: 'Quiet Room',
+    capacity: 4,
+    amenities: ['Sound Proofing', 'Comfortable Seating', 'Reading Lights'],
+    location: 'Floor 2',
+    status: 'available',
+    description: 'Peaceful space for focused work or small private meetings',
+  },
+  {
+    id: 9,
+    name: 'Presentation Studio',
+    capacity: 40,
+    amenities: ['Professional Lighting', 'Green Screen', 'High-end Audio', 'Multiple Cameras'],
+    location: 'Floor 4',
+    status: 'available',
+    description: 'Professional studio for presentations and video recordings',
+  }
 ];
+
+const FLOOR_OPTIONS = ['Floor 1', 'Floor 2', 'Floor 3', 'Floor 4'];
+const CAPACITY_OPTIONS = [5, 10, 15, 20, 25, 30, 40];
+const ROOM_TYPE_OPTIONS = ['Conference', 'Board', 'Projector'];
 
 const RoomSearch = () => {
   const [filters, setFilters] = useState({
     date: new Date(),
+    roomName: '',
+    floor: '',
     capacity: '',
-    location: '',
-    amenities: [],
+    roomType: '',
   });
-
   const [rooms, setRooms] = useState(mockRooms);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [bookingFormOpen, setBookingFormOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+
+  // Filter menu/dialog state
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+  const [filterDialog, setFilterDialog] = useState({ open: false, type: '' });
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({
@@ -66,33 +141,80 @@ const RoomSearch = () => {
   };
 
   const handleSearch = () => {
-    // TODO: Implement actual search logic
-    // For now, we'll just filter the mock data
     const filteredRooms = mockRooms.filter(room => {
+      // Room name search
+      if (filters.roomName && !room.name.toLowerCase().includes(filters.roomName.toLowerCase())) return false;
+      // Floor filter
+      if (filters.floor && !room.location.toLowerCase().includes(filters.floor.toLowerCase())) return false;
+      // Capacity filter
       if (filters.capacity && room.capacity < parseInt(filters.capacity)) return false;
-      if (filters.location && !room.location.includes(filters.location)) return false;
-      if (filters.amenities.length > 0) {
-        return filters.amenities.every(amenity => room.amenities.includes(amenity));
+      // Room type filter (simple match in name or amenities)
+      if (filters.roomType) {
+        const type = filters.roomType.toLowerCase();
+        if (!room.name.toLowerCase().includes(type) && !room.amenities.some(a => a.toLowerCase().includes(type))) return false;
       }
       return true;
     });
     setRooms(filteredRooms);
   };
 
-  const handleBookRoom = (roomId) => {
-    // TODO: Implement booking logic
-    console.log('Booking room:', roomId);
+  // Filter button handlers
+  const handleFilterButtonClick = (event) => {
+    setFilterAnchorEl(event.currentTarget);
+  };
+  const handleFilterMenuClose = () => {
+    setFilterAnchorEl(null);
+  };
+  const handleFilterCategoryClick = (type) => {
+    setFilterDialog({ open: true, type });
+    setFilterAnchorEl(null);
+  };
+  const handleFilterDialogClose = () => {
+    setFilterDialog({ open: false, type: '' });
+  };
+  const handleFilterOptionSelect = (type, value) => {
+    handleFilterChange(type, value);
+    setFilterDialog({ open: false, type: '' });
+  };
+
+  const handleBookRoom = (room) => {
+    setSelectedRoom(room);
+    setBookingFormOpen(true);
+  };
+
+  const handleBookingSubmit = (bookingData) => {
+    setSnackbarMsg('Room booked successfully!');
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseBookingForm = () => {
+    setBookingFormOpen(false);
+    setSelectedRoom(null);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbarOpen(false);
+  };
+
+  // Dialog options
+  const getDialogOptions = () => {
+    switch (filterDialog.type) {
+      case 'floor': return FLOOR_OPTIONS;
+      case 'capacity': return CAPACITY_OPTIONS;
+      case 'roomType': return ROOM_TYPE_OPTIONS;
+      default: return [];
+    }
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="room-search-container">
+      <Typography variant="h4" className="room-search-title">
         Search Rooms
       </Typography>
-      
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3}>
+      <div className="room-search-bar">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 220 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Date"
@@ -101,52 +223,71 @@ const RoomSearch = () => {
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
             </LocalizationProvider>
-          </Grid>
-          
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth>
-              <InputLabel>Capacity</InputLabel>
-              <Select
-                value={filters.capacity}
-                label="Capacity"
-                onChange={(e) => handleFilterChange('capacity', e.target.value)}
-              >
-                <MenuItem value="">Any</MenuItem>
-                <MenuItem value="5">5+ people</MenuItem>
-                <MenuItem value="10">10+ people</MenuItem>
-                <MenuItem value="20">20+ people</MenuItem>
-                <MenuItem value="30">30+ people</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12} md={3}>
+          </div>
+          <div style={{ flex: 2, minWidth: 220 }}>
             <TextField
               fullWidth
-              label="Location"
-              value={filters.location}
-              onChange={(e) => handleFilterChange('location', e.target.value)}
+              label="Room Name"
+              value={filters.roomName}
+              onChange={(e) => handleFilterChange('roomName', e.target.value)}
             />
-          </Grid>
-          
-          <Grid item xs={12} md={3}>
+          </div>
+          <div style={{ flex: 1, minWidth: 120 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleFilterButtonClick}
+              style={{ height: 56 }}
+            >
+              Filter
+            </Button>
+            <Menu
+              anchorEl={filterAnchorEl}
+              open={Boolean(filterAnchorEl)}
+              onClose={handleFilterMenuClose}
+            >
+              <MenuItem onClick={() => handleFilterCategoryClick('floor')}>Floor</MenuItem>
+              <MenuItem onClick={() => handleFilterCategoryClick('capacity')}>Capacity</MenuItem>
+              <MenuItem onClick={() => handleFilterCategoryClick('roomType')}>Room Type</MenuItem>
+            </Menu>
+          </div>
+          <div style={{ flex: 1, minWidth: 120 }}>
             <Button
               fullWidth
               variant="contained"
               onClick={handleSearch}
-              sx={{ height: '56px' }}
+              style={{ height: 56 }}
             >
               Search
             </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+          </div>
+        </div>
+      </div>
 
-      <Grid container spacing={3}>
+      {/* Filter Dialog */}
+      <Dialog open={filterDialog.open} onClose={handleFilterDialogClose}>
+        <DialogTitle>Select {filterDialog.type === 'floor' ? 'Floor' : filterDialog.type === 'capacity' ? 'Capacity' : 'Room Type'}</DialogTitle>
+        <DialogContent>
+          <List>
+            {getDialogOptions().map(option => (
+              <ListItem key={option} disablePadding>
+                <ListItemButton onClick={() => handleFilterOptionSelect(filterDialog.type, option)}>
+                  <ListItemText primary={option} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleFilterDialogClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+
+      <div className="room-grid">
         {rooms.map((room) => (
-          <Grid item xs={12} md={4} key={room.id}>
-            <Card>
-              <CardContent>
+          <div className="room-grid-item" key={room.id}>
+            <Card className="room-card">
+              <CardContent className="room-card-content">
                 <Typography variant="h6" gutterBottom>
                   {room.name}
                 </Typography>
@@ -154,9 +295,12 @@ const RoomSearch = () => {
                   Location: {room.location}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  Capacity: {room.capacity} people
+                  <b>Capacity:</b> {room.capacity} people
                 </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+                <Typography variant="body2" color="text.secondary" style={{ marginBottom: 16 }}>
+                  {room.description}
+                </Typography>
+                <div className="room-amenities">
                   {room.amenities.map((amenity) => (
                     <Chip
                       key={amenity}
@@ -165,22 +309,42 @@ const RoomSearch = () => {
                       variant="outlined"
                     />
                   ))}
-                </Stack>
+                </div>
               </CardContent>
-              <CardActions>
+              <CardActions className="room-card-actions">
                 <Button
                   size="small"
                   color="primary"
-                  onClick={() => handleBookRoom(room.id)}
+                  onClick={() => handleBookRoom(room)}
                 >
                   Book Now
                 </Button>
               </CardActions>
             </Card>
-          </Grid>
+          </div>
         ))}
-      </Grid>
-    </Box>
+      </div>
+
+      {selectedRoom && (
+        <BookingForm
+          open={bookingFormOpen}
+          onClose={handleCloseBookingForm}
+          room={selectedRoom}
+          onBook={handleBookingSubmit}
+        />
+      )}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+          {snackbarMsg}
+        </Alert>
+      </Snackbar>
+    </div>
   );
 };
 
