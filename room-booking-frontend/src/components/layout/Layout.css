@@ -1,0 +1,19 @@
+/* Layout.css */
+
+.layout-root {
+  display: flex;
+}
+
+.layout-main {
+  flex-grow: 1;
+  padding: 24px;
+  width: 100%;
+  background: #f7f7f7;
+  min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+  .layout-main {
+    padding: 12px;
+  }
+}
