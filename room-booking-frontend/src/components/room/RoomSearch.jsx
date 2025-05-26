@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import 'primereact/resources/themes/lara-light-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';
+import React, { useState, useRef } from 'react';
 import './RoomSearch.css';
 import {
   TextField,
@@ -10,7 +14,6 @@ import {
   Chip,
   Snackbar,
   Alert,
-  Menu,
   MenuItem,
   Dialog,
   DialogTitle,
@@ -25,6 +28,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import BookingForm from '../booking/BookingForm';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { Checkbox } from 'primereact/checkbox';
+import { Menu } from 'primereact/menu';
 
 // Mock data for rooms
 const mockRooms = [
@@ -115,67 +121,101 @@ const FLOOR_OPTIONS = ['Floor 1', 'Floor 2', 'Floor 3', 'Floor 4'];
 const CAPACITY_OPTIONS = [5, 10, 15, 20, 25, 30, 40];
 const ROOM_TYPE_OPTIONS = ['Conference', 'Board', 'Projector'];
 
+const FILTER_CATEGORIES = [
+  { key: 'floor', label: 'Floor' },
+  { key: 'capacity', label: 'Capacity' },
+  { key: 'roomType', label: 'Room Type' },
+];
+
 const RoomSearch = () => {
   const [filters, setFilters] = useState({
     date: new Date(),
     roomName: '',
-    floor: '',
-    capacity: '',
-    roomType: '',
+    floor: [],
+    capacity: [],
+    roomType: [],
   });
   const [rooms, setRooms] = useState(mockRooms);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [bookingFormOpen, setBookingFormOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [sortOption, setSortOption] = useState('name-asc');
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
 
-  // Filter menu/dialog state
-  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
-  const [filterDialog, setFilterDialog] = useState({ open: false, type: '' });
+  // PrimeReact refs
+  const filterPanelRef = useRef(null);
+  const sortMenuRef = useRef(null);
 
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSearch = () => {
-    const filteredRooms = mockRooms.filter(room => {
-      // Room name search
-      if (filters.roomName && !room.name.toLowerCase().includes(filters.roomName.toLowerCase())) return false;
+  // Live search and filter
+  React.useEffect(() => {
+    let filtered = mockRooms.filter(room => {
+      // Live room name search (starts with)
+      if (filters.roomName && !room.name.toLowerCase().startsWith(filters.roomName.toLowerCase())) return false;
       // Floor filter
-      if (filters.floor && !room.location.toLowerCase().includes(filters.floor.toLowerCase())) return false;
+      if (filters.floor.length > 0 && !filters.floor.includes(room.location)) return false;
       // Capacity filter
-      if (filters.capacity && room.capacity < parseInt(filters.capacity)) return false;
-      // Room type filter (simple match in name or amenities)
-      if (filters.roomType) {
-        const type = filters.roomType.toLowerCase();
-        if (!room.name.toLowerCase().includes(type) && !room.amenities.some(a => a.toLowerCase().includes(type))) return false;
+      if (filters.capacity.length > 0 && !filters.capacity.includes(room.capacity)) return false;
+      // Room type filter
+      if (filters.roomType.length > 0) {
+        const match = filters.roomType.some(type =>
+          room.name.toLowerCase().includes(type.toLowerCase()) ||
+          room.amenities.some(a => a.toLowerCase().includes(type.toLowerCase()))
+        );
+        if (!match) return false;
       }
       return true;
     });
-    setRooms(filteredRooms);
+    // Sort
+    if (sortOption === 'name-asc') {
+      filtered = filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOption === 'name-desc') {
+      filtered = filtered.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortOption === 'capacity-asc') {
+      filtered = filtered.sort((a, b) => a.capacity - b.capacity);
+    } else if (sortOption === 'capacity-desc') {
+      filtered = filtered.sort((a, b) => b.capacity - a.capacity);
+    }
+    setRooms(filtered);
+  }, [filters, sortOption]);
+
+  // Filter options
+  const handleFilterChange = (type, value) => {
+    setFilters(prev => {
+      const arr = prev[type];
+      const newArr = arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
+      return { ...prev, [type]: newArr };
+    });
   };
 
-  // Filter button handlers
-  const handleFilterButtonClick = (event) => {
-    setFilterAnchorEl(event.currentTarget);
-  };
-  const handleFilterMenuClose = () => {
-    setFilterAnchorEl(null);
-  };
-  const handleFilterCategoryClick = (type) => {
-    setFilterDialog({ open: true, type });
-    setFilterAnchorEl(null);
-  };
-  const handleFilterDialogClose = () => {
-    setFilterDialog({ open: false, type: '' });
-  };
-  const handleFilterOptionSelect = (type, value) => {
-    handleFilterChange(type, value);
-    setFilterDialog({ open: false, type: '' });
-  };
+  // Sort menu
+  const sortItems = [
+    {
+      label: 'Room Name A-Z',
+      icon: 'pi pi-sort-alpha-down',
+      command: () => setSortOption('name-asc'),
+    },
+    {
+      label: 'Room Name Z-A',
+      icon: 'pi pi-sort-alpha-up',
+      command: () => setSortOption('name-desc'),
+    },
+    {
+      separator: true
+    },
+    {
+      label: 'Capacity Ascending',
+      icon: 'pi pi-sort-numeric-down',
+      command: () => setSortOption('capacity-asc'),
+    },
+    {
+      label: 'Capacity Descending',
+      icon: 'pi pi-sort-numeric-up',
+      command: () => setSortOption('capacity-desc'),
+    },
+  ];
 
   const handleBookRoom = (room) => {
     setSelectedRoom(room);
@@ -197,14 +237,27 @@ const RoomSearch = () => {
     setSnackbarOpen(false);
   };
 
-  // Dialog options
-  const getDialogOptions = () => {
-    switch (filterDialog.type) {
-      case 'floor': return FLOOR_OPTIONS;
-      case 'capacity': return CAPACITY_OPTIONS;
-      case 'roomType': return ROOM_TYPE_OPTIONS;
-      default: return [];
-    }
+  // Open filter menu
+  const handleFilterButtonClick = (e) => {
+    setFilterMenuAnchor(e.currentTarget);
+    setFilterMenuOpen(true);
+    setActiveCategory(null);
+  };
+  // Close filter menu
+  const handleFilterMenuClose = () => {
+    setFilterMenuOpen(false);
+    setActiveCategory(null);
+  };
+  // Open submenu for category
+  const handleCategoryClick = (cat) => {
+    setActiveCategory(cat);
+  };
+  // Get submenu options
+  const getSubmenuOptions = () => {
+    if (activeCategory === 'floor') return FLOOR_OPTIONS;
+    if (activeCategory === 'capacity') return CAPACITY_OPTIONS;
+    if (activeCategory === 'roomType') return ROOM_TYPE_OPTIONS;
+    return [];
   };
 
   return (
@@ -219,7 +272,7 @@ const RoomSearch = () => {
               <DatePicker
                 label="Date"
                 value={filters.date}
-                onChange={(newValue) => handleFilterChange('date', newValue)}
+                onChange={(newValue) => setFilters(prev => ({ ...prev, date: newValue }))}
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
             </LocalizationProvider>
@@ -229,59 +282,64 @@ const RoomSearch = () => {
               fullWidth
               label="Room Name"
               value={filters.roomName}
-              onChange={(e) => handleFilterChange('roomName', e.target.value)}
+              onChange={e => setFilters(prev => ({ ...prev, roomName: e.target.value }))}
             />
           </div>
-          <div style={{ flex: 1, minWidth: 120 }}>
+          <div style={{ flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
             <Button
               fullWidth
               variant="outlined"
               onClick={handleFilterButtonClick}
-              style={{ height: 56 }}
+              className="p-button p-component"
+              style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              Filter
+              <i className="pi pi-filter" style={{ marginRight: 8 }} /> Filter
             </Button>
-            <Menu
-              anchorEl={filterAnchorEl}
-              open={Boolean(filterAnchorEl)}
-              onClose={handleFilterMenuClose}
-            >
-              <MenuItem onClick={() => handleFilterCategoryClick('floor')}>Floor</MenuItem>
-              <MenuItem onClick={() => handleFilterCategoryClick('capacity')}>Capacity</MenuItem>
-              <MenuItem onClick={() => handleFilterCategoryClick('roomType')}>Room Type</MenuItem>
-            </Menu>
-          </div>
-          <div style={{ flex: 1, minWidth: 120 }}>
+            {filterMenuOpen && (
+              <div
+                className="filter-main-menu"
+                style={{ position: 'absolute', top: 60, right: 0 }}
+                onMouseLeave={handleFilterMenuClose}
+              >
+                {FILTER_CATEGORIES.map(cat => (
+                  <div
+                    key={cat.key}
+                    className={`filter-main-menu-item${activeCategory === cat.key ? ' active' : ''}`}
+                    onMouseEnter={() => handleCategoryClick(cat.key)}
+                    onClick={() => handleCategoryClick(cat.key)}
+                  >
+                    {cat.label}
+                  </div>
+                ))}
+                {/* Submenu */}
+                {activeCategory && (
+                  <div className="filter-submenu-panel">
+                    <div className="filter-submenu-title">
+                      {FILTER_CATEGORIES.find(c => c.key === activeCategory)?.label}
+                    </div>
+                    {getSubmenuOptions().map(option => (
+                      <div className="filter-checkbox-row" key={option}>
+                        <Checkbox inputId={`filter-${activeCategory}-${option}`} checked={filters[activeCategory].includes(option)} onChange={() => handleFilterChange(activeCategory, option)} />
+                        <label htmlFor={`filter-${activeCategory}-${option}`}>{activeCategory === 'capacity' ? `${option} people` : option}</label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <Button
               fullWidth
               variant="contained"
-              onClick={handleSearch}
-              style={{ height: 56 }}
+              onClick={e => sortMenuRef.current.toggle(e)}
+              className="p-button p-component"
+              style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              Search
+              <i className="pi pi-sort-alt" style={{ marginRight: 8 }} /> Sort
             </Button>
+            <Menu model={sortItems} popup ref={sortMenuRef} />
           </div>
         </div>
       </div>
-
-      {/* Filter Dialog */}
-      <Dialog open={filterDialog.open} onClose={handleFilterDialogClose}>
-        <DialogTitle>Select {filterDialog.type === 'floor' ? 'Floor' : filterDialog.type === 'capacity' ? 'Capacity' : 'Room Type'}</DialogTitle>
-        <DialogContent>
-          <List>
-            {getDialogOptions().map(option => (
-              <ListItem key={option} disablePadding>
-                <ListItemButton onClick={() => handleFilterOptionSelect(filterDialog.type, option)}>
-                  <ListItemText primary={option} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleFilterDialogClose}>Cancel</Button>
-        </DialogActions>
-      </Dialog>
 
       <div className="room-grid">
         {rooms.map((room) => (
