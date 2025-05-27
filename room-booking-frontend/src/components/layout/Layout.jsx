@@ -119,7 +119,6 @@ const Layout = ({ children }) => {
         </Drawer>
       </Box>
       <Box component="main" className="layout-main">
-        <Toolbar />
         {children}
       </Box>
     </Box>

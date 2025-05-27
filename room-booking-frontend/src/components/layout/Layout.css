@@ -2,18 +2,49 @@
 
 .layout-root {
   display: flex;
+  min-height: 100vh;
+  background: #f4f6fa;
 }
 
 .layout-main {
   flex-grow: 1;
-  padding: 24px;
+  padding: 32px 40px;
   width: 100%;
-  background: #f7f7f7;
+  background: #f4f6fa;
   min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Sidebar styles for MUI Drawer */
+.MuiDrawer-paper {
+  background: #233044 !important;
+  color: #fff !important;
+  border-right: none !important;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+}
+
+.MuiToolbar-root {
+  background: #673ab7 !important;
+  color: #fff !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+.MuiListItem-root {
+  border-radius: 6px;
+  margin: 4px 8px;
+  transition: background 0.2s;
+}
+.MuiListItem-root:hover, .Mui-selected {
+  background: #673ab7 !important;
+  color: #fff !important;
+}
+.MuiListItemIcon-root {
+  color: #b39ddb !important;
 }
 
 @media (max-width: 900px) {
   .layout-main {
-    padding: 12px;
+    padding: 16px 8px;
   }
 }
