@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -8,6 +8,8 @@ import Layout from './components/layout/Layout';
 import Login from './components/auth/Login';
 import RoomSearch from './components/room/RoomSearch';
 import BookingStatus from './components/booking/BookingStatus';
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminBookings from './components/admin/AdminBookings';
 
 // Initial mock bookings
 const initialBookings = [
@@ -64,7 +66,16 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
-  const [bookings, setBookings] = useState(initialBookings);
+  // Load from localStorage or use initialBookings
+  const [bookings, setBookings] = useState(() => {
+    const saved = localStorage.getItem('bookings');
+    return saved ? JSON.parse(saved) : initialBookings;
+  });
+
+  // Save to localStorage whenever bookings change
+  useEffect(() => {
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+  }, [bookings]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -85,6 +96,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <BookingStatus bookings={bookings} setBookings={setBookings} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute>
+                <AdminBookings bookings={bookings} setBookings={setBookings} />
               </ProtectedRoute>
             }
           />
