@@ -1,0 +1,88 @@
+/* AdminBookings.css */
+
+.admin-bookings-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.admin-bookings-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.admin-booking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-booking-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 6px solid #1976d2;
+}
+
+.admin-booking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.admin-booking-card-details {
+  color: #555;
+  font-size: 0.98rem;
+}
+
+.admin-booking-status-badge {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fff;
+  background: #fbc02d;
+}
+
+.admin-booking-card-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+}
+
+.admin-approve-btn {
+  background: #43a047;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 0.97rem;
+  transition: background 0.2s;
+}
+.admin-approve-btn:hover {
+  background: #2e7d32;
+}
+
+.admin-reject-btn {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 0.97rem;
+  transition: background 0.2s;
+}
+.admin-reject-btn:hover {
+  background: #b71c1c;
+} 

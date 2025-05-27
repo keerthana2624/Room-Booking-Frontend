@@ -1,0 +1,112 @@
+/* AdminDashboard.css */
+
+.admin-dashboard-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.admin-dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.admin-dashboard-cards {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.admin-dashboard-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 24px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.admin-room-list {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 24px;
+}
+
+.admin-room-list-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.admin-room-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-room-table th, .admin-room-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+.admin-room-table th {
+  background: #f7f7f7;
+}
+
+.admin-room-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-room-btn {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 0.97rem;
+  transition: background 0.2s;
+}
+.admin-room-btn.edit {
+  background: #43a047;
+}
+.admin-room-btn.delete {
+  background: #e53935;
+}
+.admin-room-btn.edit:hover {
+  background: #2e7d32;
+}
+.admin-room-btn.delete:hover {
+  background: #b71c1c;
+}
+
+.admin-add-room-form {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-add-room-form input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+.admin-add-room-form button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 18px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.admin-add-room-form button:hover {
+  background: #115293;
+} 
