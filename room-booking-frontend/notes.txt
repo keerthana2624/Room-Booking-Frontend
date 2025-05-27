@@ -1,0 +1,16 @@
+   User Flow:
+   1. User logs in
+   2. Searches for rooms using filters
+   3. Views room availability in calendar
+   4. Selects time slot
+   5. Fills booking form
+   6. Submits request
+   7. Views booking status
+
+   Admin Flow:
+   1. Admin logs in
+   2. Views dashboard
+   3. Manages rooms (add/edit/delete)
+   4. Views pending booking requests
+   5. Approves/rejects bookings
+   6. Views booking reports

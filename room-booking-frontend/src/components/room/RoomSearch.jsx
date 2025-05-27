@@ -2,7 +2,7 @@ import 'primereact/resources/themes/lara-light-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import './RoomSearch.css';
 import {
   TextField,
@@ -13,22 +13,12 @@ import {
   Button,
   Chip,
   Snackbar,
-  Alert,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText
+  Alert
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import BookingForm from '../booking/BookingForm';
-import { OverlayPanel } from 'primereact/overlaypanel';
 import { Checkbox } from 'primereact/checkbox';
 import { Menu } from 'primereact/menu';
 
@@ -127,7 +117,7 @@ const FILTER_CATEGORIES = [
   { key: 'roomType', label: 'Room Type' },
 ];
 
-const RoomSearch = () => {
+const RoomSearch = ({ bookings, setBookings }) => {
   const [filters, setFilters] = useState({
     date: new Date(),
     roomName: '',
@@ -142,12 +132,8 @@ const RoomSearch = () => {
   const [snackbarMsg, setSnackbarMsg] = useState('');
   const [sortOption, setSortOption] = useState('name-asc');
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
-
-  // PrimeReact refs
-  const filterPanelRef = useRef(null);
-  const sortMenuRef = useRef(null);
+  const sortMenuRef = React.useRef(null);
 
   // Live search and filter
   React.useEffect(() => {
@@ -225,6 +211,21 @@ const RoomSearch = () => {
   const handleBookingSubmit = (bookingData) => {
     setSnackbarMsg('Room booked successfully!');
     setSnackbarOpen(true);
+    // Ensure bookingData.startTime and endTime are Date objects
+    const start = new Date(bookingData.startTime);
+    const end = new Date(bookingData.endTime);
+    setBookings(prev => [
+      ...prev,
+      {
+        id: prev.length ? Math.max(...prev.map(b => b.id)) + 1 : 1,
+        roomName: selectedRoom.name,
+        date: start.toISOString().slice(0, 10),
+        startTime: start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        endTime: end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'pending',
+        purpose: bookingData.purpose,
+      }
+    ]);
   };
 
   const handleCloseBookingForm = () => {
@@ -239,7 +240,6 @@ const RoomSearch = () => {
 
   // Open filter menu
   const handleFilterButtonClick = (e) => {
-    setFilterMenuAnchor(e.currentTarget);
     setFilterMenuOpen(true);
     setActiveCategory(null);
   };
