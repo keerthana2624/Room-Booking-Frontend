@@ -10,6 +10,7 @@ import RoomSearch from './components/room/RoomSearch';
 import BookingStatus from './components/booking/BookingStatus';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminBookings from './components/admin/AdminBookings';
+import CalendarPage from './components/CalendarPage';
 
 // Initial mock bookings
 const initialBookings = [
@@ -96,6 +97,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <BookingStatus bookings={bookings} setBookings={setBookings} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <CalendarPage bookings={bookings} />
               </ProtectedRoute>
             }
           />

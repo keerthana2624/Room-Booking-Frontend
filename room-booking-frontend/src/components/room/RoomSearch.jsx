@@ -13,7 +13,8 @@ import {
   Button,
   Chip,
   Snackbar,
-  Alert
+  Alert,
+  Box
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -134,6 +135,7 @@ const RoomSearch = ({ bookings, setBookings }) => {
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const sortMenuRef = React.useRef(null);
+  const filterMenuRef = React.useRef(null);
 
   // Live search and filter
   React.useEffect(() => {
@@ -260,12 +262,32 @@ const RoomSearch = ({ bookings, setBookings }) => {
     return [];
   };
 
+  // Effect to close filter menu when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
+        handleFilterMenuClose();
+      }
+    }
+    // Bind the event listener
+    if (filterMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    // Unbind the event listener on cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [filterMenuOpen]); // Re-run effect when filterMenuOpen changes
+
   return (
-    <div className="room-search-container">
-      <Typography variant="h4" className="room-search-title">
+    <Box className="room-search-container">
+      <Typography variant="h4" component="h1" className="room-search-title">
         Search Rooms
       </Typography>
-      <div className="room-search-bar">
+      <Box className="room-search-bar" display="flex" alignItems="center" gap={2} width="100%">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
           <div style={{ flex: 1, minWidth: 220 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -273,16 +295,41 @@ const RoomSearch = ({ bookings, setBookings }) => {
                 label="Date"
                 value={filters.date}
                 onChange={(newValue) => setFilters(prev => ({ ...prev, date: newValue }))}
-                renderInput={(params) => <TextField {...params} fullWidth />}
+                renderInput={(params) => <TextField {...params} fullWidth 
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '999px',
+                      // Ensure purple border on focus
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#673ab7',
+                      },
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                       borderRadius: '999px',
+                    },
+                  }}
+                />}
               />
             </LocalizationProvider>
           </div>
-          <div style={{ flex: 2, minWidth: 220 }}>
+          <div style={{ flex: 1, minWidth: 220 }}>
             <TextField
               fullWidth
               label="Room Name"
               value={filters.roomName}
               onChange={e => setFilters(prev => ({ ...prev, roomName: e.target.value }))}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '999px',
+                  // Ensure purple border on focus
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#673ab7',
+                  },
+                },
+                 '& .MuiOutlinedInput-notchedOutline': {
+                   borderRadius: '999px',
+                },
+              }}
             />
           </div>
           <div style={{ flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
@@ -292,6 +339,23 @@ const RoomSearch = ({ bookings, setBookings }) => {
               onClick={handleFilterButtonClick}
               className="p-button p-component"
               style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              sx={{
+                 borderRadius: '999px',
+                 borderColor: '#673ab7',
+                 color: '#673ab7',
+                 '&:hover': {
+                     borderColor: '#5e35b1',
+                     backgroundColor: 'rgba(103, 58, 183, 0.04)',
+                 },
+                 '&:focus': {
+                     borderColor: '#5e35b1',
+                     backgroundColor: 'rgba(103, 58, 183, 0.04)',
+                 },
+                 '&.Mui-disabled': {
+                     borderColor: '#d1c4e9',
+                     color: '#d1c4e9',
+                 },
+              }}
             >
               <i className="pi pi-filter" style={{ marginRight: 8 }} /> Filter
             </Button>
@@ -299,13 +363,12 @@ const RoomSearch = ({ bookings, setBookings }) => {
               <div
                 className="filter-main-menu"
                 style={{ position: 'absolute', top: 60, right: 0 }}
-                onMouseLeave={handleFilterMenuClose}
+                ref={filterMenuRef}
               >
                 {FILTER_CATEGORIES.map(cat => (
                   <div
                     key={cat.key}
                     className={`filter-main-menu-item${activeCategory === cat.key ? ' active' : ''}`}
-                    onMouseEnter={() => handleCategoryClick(cat.key)}
                     onClick={() => handleCategoryClick(cat.key)}
                   >
                     {cat.label}
@@ -314,9 +377,33 @@ const RoomSearch = ({ bookings, setBookings }) => {
                 {/* Submenu */}
                 {activeCategory && (
                   <div className="filter-submenu-panel">
-                    <div className="filter-submenu-title">
-                      {FILTER_CATEGORIES.find(c => c.key === activeCategory)?.label}
+                    {/* Flex container for title and Clear button */} 
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div className="filter-submenu-title">
+                        {FILTER_CATEGORIES.find(c => c.key === activeCategory)?.label}
+                      </div>
+                       {/* Clear button for all filter categories */} 
+                      {(activeCategory === 'floor' || activeCategory === 'capacity' || activeCategory === 'roomType') && (
+                        <Button 
+                          size="small" 
+                          onClick={() => {
+                            console.log(`Clear ${activeCategory} button clicked`); // Updated console log
+                            setFilters(prev => ({ ...prev, [activeCategory]: [] })); // Clear the active category filter
+                          }}
+                          sx={{
+                             color: '#673ab7', // Purple color
+                             '&:hover': {
+                                 backgroundColor: 'rgba(103, 58, 183, 0.04)', // Subtle purple hover
+                             },
+                             marginTop: '0',
+                             marginBottom: '0',
+                          }}
+                        >
+                          Clear
+                        </Button>
+                      )}
                     </div>
+                    {/* Checkboxes */} 
                     {getSubmenuOptions().map(option => (
                       <div className="filter-checkbox-row" key={option}>
                         <Checkbox inputId={`filter-${activeCategory}-${option}`} checked={filters[activeCategory].includes(option)} onChange={() => handleFilterChange(activeCategory, option)} />
@@ -333,13 +420,28 @@ const RoomSearch = ({ bookings, setBookings }) => {
               onClick={e => sortMenuRef.current.toggle(e)}
               className="p-button p-component"
               style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              sx={{
+                 borderRadius: '999px',
+                 backgroundColor: '#673ab7',
+                 color: '#fff',
+                  '&:hover': {
+                     backgroundColor: '#5e35b1',
+                 },
+                 '&:focus': {
+                     backgroundColor: '#5e35b1',
+                 },
+                 '&.Mui-disabled': {
+                     backgroundColor: '#d1c4e9',
+                     color: '#f0f0f0',
+                 },
+              }}
             >
               <i className="pi pi-sort-alt" style={{ marginRight: 8 }} /> Sort
             </Button>
             <Menu model={sortItems} popup ref={sortMenuRef} />
           </div>
         </div>
-      </div>
+      </Box>
 
       <div className="room-grid">
         {rooms.map((room) => (
@@ -402,7 +504,7 @@ const RoomSearch = ({ bookings, setBookings }) => {
           {snackbarMsg}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

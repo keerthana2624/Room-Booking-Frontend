@@ -38,4 +38,4 @@ const AdminBookings = ({ bookings, setBookings }) => {
   );
 };
 
-export default AdminBookings; 
+export default AdminBookings;

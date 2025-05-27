@@ -6,15 +6,15 @@
 }
 
 .room-search-title {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .room-search-bar {
-  padding: 16px;
+  padding: 12px;
   margin-bottom: 24px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.02);
 }
 
 .room-grid {
@@ -35,10 +35,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  border: none;
+  border-radius: 999px;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   padding: 16px;
 }
 
@@ -82,8 +82,8 @@
   transition: background 0.2s;
 }
 .filter-main-menu-item:hover, .filter-main-menu-item.active {
-  background: #f0f4f8;
-  color: #1976d2;
+  background: #e1bee7;
+  color: #4a148c;
 }
 
 .filter-submenu-panel {
@@ -103,15 +103,124 @@
 .filter-submenu-title {
   font-weight: 600;
   margin-bottom: 12px;
+  color: #673ab7;
 }
 
 .filter-checkbox-row {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
+  color: #222;
 }
 
 .filter-checkbox-row label {
   margin-left: 8px;
   font-size: 1rem;
+}
+
+/* Styling for PrimeReact Checkbox - overrides default */
+.p-checkbox .p-checkbox-box.p-highlight {
+  border-color: #673ab7 !important;
+  background: #673ab7 !important;
+}
+
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box:hover {
+  border-color: #673ab7 !important;
+}
+
+/* Styling for pill-shaped input fields */
+
+/* Target the root of the outlined input */
+.MuiOutlinedInput-root {
+  border-radius: 999px !important; /* Apply pill shape */
+}
+
+/* Ensure the input element inside also has rounded corners if needed */
+.MuiOutlinedInput-input {
+  border-radius: 999px !important; /* Apply pill shape */
+}
+
+/* Remove default border color on hover/focus to avoid square corners */
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.23) !important; /* Revert to default border color on hover or set to transparent */
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #673ab7 !important; /* Use purple for border when focused */
+}
+
+/* More specific rule for DatePicker focused border */
+.MuiDatePicker-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #673ab7 !important; /* Ensure purple border on focused DatePicker */
+}
+
+/* Ensure pill shape on the DatePicker input's internal elements */
+.MuiDatePicker-root .MuiOutlinedInput-root, 
+.MuiDatePicker-root .MuiOutlinedInput-input, 
+.MuiDatePicker-root .MuiOutlinedInput-notchedOutline {
+  border-radius: 999px !important; /* Apply pill shape specifically to DatePicker */
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-radius: 999px !important; /* Apply pill shape to the border outline */
+}
+
+/* Button Styling (Purple Theme) - Ensuring pill shape */
+
+/* Contained Button (e.g., Sort button) */
+.MuiButton-contained {
+  background-color: #673ab7 !important;
+  color: #fff !important;
+  border-radius: 999px !important; /* Ensure pill shape */
+}
+
+.MuiButton-contained:hover,
+.MuiButton-contained:focus {
+  background-color: #5e35b1 !important; /* Darker purple on hover/focus */
+}
+
+.MuiButton-contained.Mui-disabled {
+  background-color: #d1c4e9 !important; /* Lighter purple/gray for disabled */
+  color: #f0f0f0 !important;
+}
+
+/* Outlined Button (e.g., Filter button) */
+.MuiButton-outlined {
+  color: #673ab7 !important;
+  border-color: #673ab7 !important;
+  border-radius: 999px !important; /* Ensure pill shape */
+}
+
+.MuiButton-outlined:hover,
+.MuiButton-outlined:focus {
+  background-color: rgba(103, 58, 183, 0.04) !important; /* Subtle purple background on hover/focus */
+  border-color: #5e35b1 !important; /* Darker purple border on hover/focus */
+}
+
+.MuiButton-outlined.Mui-disabled {
+  color: #d1c4e9 !important; /* Lighter purple/gray for disabled */
+  border-color: #d1c4e9 !important;
+}
+
+/* Target PrimeReact button classes for pill shape - specifically for the Filter button */
+.p-button.MuiButton-outlined {
+  border-radius: 999px !important; /* Apply pill shape to Outlined Material UI button with p-button class */
+}
+
+.p-button.MuiButton-contained {
+  border-radius: 999px !important; /* Apply pill shape to Contained Material UI button with p-button class */
+}
+
+/* Text Button (e.g., Book Now button) */
+.MuiButton-text {
+  color: #673ab7 !important;
+}
+
+.MuiButton-text:hover,
+.MuiButton-text:focus {
+  background-color: rgba(103, 58, 183, 0.04) !important; /* Subtle purple background on hover/focus */
+}
+
+.MuiButton-text.Mui-disabled {
+  color: #d1c4e9 !important; /* Lighter purple/gray for disabled */
 } 
